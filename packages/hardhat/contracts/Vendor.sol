@@ -8,6 +8,11 @@ contract Vendor is Ownable {
     YourToken public yourToken;
     uint256 public constant tokensPerEth = 100;
     event BuyTokens(address buyer, uint256 amountOfETH, uint256 amountOfTokens);
+    event SellTokens(
+        address seller,
+        uint256 amountOfETH,
+        uint256 amountOfTokens
+    );
 
     constructor(address tokenAddress) {
         yourToken = YourToken(tokenAddress);
@@ -15,8 +20,15 @@ contract Vendor is Ownable {
 
     // ToDo: create a payable buyTokens() function:
     function buyTokens() public payable {
+        //Validate buy amount
+        require(msg.value > 0, "Buy amount must be larger than 0");
+
         uint YourTokenAmount = msg.value * tokensPerEth;
-        yourToken.transfer(msg.sender, YourTokenAmount);
+        require(yourToken.balanceOf(address(this)) >= YourTokenAmount);
+
+        bool sent = yourToken.transfer(msg.sender, YourTokenAmount);
+        require(sent, "Failed to transfer token");
+
         emit BuyTokens(msg.sender, msg.value, YourTokenAmount);
     }
 
@@ -24,5 +36,26 @@ contract Vendor is Ownable {
     function withdraw() public onlyOwner {
         payable(msg.sender).transfer(address(this).balance);
     }
+
     // ToDo: create a sellTokens(uint256 _amount) function:
+    function sellTokens(uint256 _amount) public {
+        //Validate sell amount
+        require(_amount > 0, "Must sell a token amount greater than 0");
+        require(
+            yourToken.balanceOf(msg.sender) >= _amount,
+            "User does not have enough tokens"
+        );
+
+        bool tokenSent = yourToken.transferFrom(
+            msg.sender,
+            address(this),
+            _amount
+        );
+        require(tokenSent, "Failed to transfer tokens");
+
+        (bool ethSent, ) = msg.sender.call{value: _amount / tokensPerEth}("");
+        require(ethSent, "Failed to send back eth");
+
+        emit SellTokens(msg.sender, _amount / tokensPerEth, _amount);
+    }
 }
