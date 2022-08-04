@@ -60,7 +60,7 @@ const { ethers } = require("ethers");
 */
 
 /// 📡 What chain are your contracts deployed to?
-const targetNetwork = NETWORKS.localhost; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
+const targetNetwork = NETWORKS.rinkeby; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
 
 // 😬 Sorry for all the console logging
 const DEBUG = true;
@@ -78,8 +78,8 @@ const scaffoldEthProvider = navigator.onLine
   : null;
 const poktMainnetProvider = navigator.onLine
   ? new ethers.providers.StaticJsonRpcProvider(
-      "https://eth-mainnet.gateway.pokt.network/v1/lb/611156b4a585a20035148406",
-    )
+    "https://eth-mainnet.gateway.pokt.network/v1/lb/611156b4a585a20035148406",
+  )
   : null;
 const mainnetInfura = navigator.onLine
   ? new ethers.providers.StaticJsonRpcProvider("https://mainnet.infura.io/v3/" + INFURA_ID)
@@ -178,8 +178,8 @@ function App(props) {
     poktMainnetProvider && poktMainnetProvider._isProvider
       ? poktMainnetProvider
       : scaffoldEthProvider && scaffoldEthProvider._network
-      ? scaffoldEthProvider
-      : mainnetInfura;
+        ? scaffoldEthProvider
+        : mainnetInfura;
 
   const [injectedProvider, setInjectedProvider] = useState();
   const [address, setAddress] = useState();
@@ -263,7 +263,7 @@ function App(props) {
   const vendorApproval = useContractReader(readContracts, "YourToken", "allowance", [
     address, vendorAddress
   ]);
-  console.log("🤏 vendorApproval",vendorApproval)
+  console.log("🤏 vendorApproval", vendorApproval)
 
   const vendorTokenBalance = useContractReader(readContracts, "YourToken", "balanceOf", [vendorAddress]);
   console.log("🏵 vendorTokenBalance:", vendorTokenBalance ? ethers.utils.formatEther(vendorTokenBalance) : "...");
@@ -496,13 +496,13 @@ function App(props) {
   });
   const [isSellAmountApproved, setIsSellAmountApproved] = useState();
 
-  useEffect(()=>{
-    console.log("tokenSellAmount",tokenSellAmount.value)
+  useEffect(() => {
+    console.log("tokenSellAmount", tokenSellAmount.value)
     const tokenSellAmountBN = tokenSellAmount.valid ? ethers.utils.parseEther("" + tokenSellAmount.value) : 0;
-    console.log("tokenSellAmountBN",tokenSellAmountBN)
+    console.log("tokenSellAmountBN", tokenSellAmountBN)
     setIsSellAmountApproved(vendorApproval && tokenSellAmount.value && vendorApproval.gte(tokenSellAmountBN))
-  },[tokenSellAmount, readContracts])
-  console.log("isSellAmountApproved",isSellAmountApproved)
+  }, [tokenSellAmount, readContracts])
+  console.log("isSellAmountApproved", isSellAmountApproved)
 
   const ethCostToPurchaseTokens =
     tokenBuyAmount.valid && tokensPerEth && ethers.utils.parseEther("" + tokenBuyAmount.value / parseFloat(tokensPerEth));
@@ -635,9 +635,9 @@ function App(props) {
                 </div>
               </Card>
             </div>
-          
-            
-            
+
+
+
             {/*Extra UI for buying the tokens back from the user using "approve" and "sellTokens"
 
             <Divider />
